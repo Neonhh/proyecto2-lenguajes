@@ -1,4 +1,1 @@
-junta(
-    pasillo(a, regular),
-    pasillo(a, de_cabeza)
-).
+pasillo(b,regular).

@@ -18,8 +18,13 @@ leer(Mapa) :-
         )
         ).
 
+
 % Determina las configuraciones de palancas en el laberinto que generan un cruce de estado Seguro. 
-%% Casos base
+cruzar(Mapa, Palancas, Seguro) :- var(Mapa),
+    leer(Mapa),
+    cruzar(Mapa, Palancas, Seguro).
+
+%% Casos base (pasillos)
 cruzar(pasillo(X,regular), Palancas, seguro) :- 
     obtenerPalanca(X, Palancas, Palanca),
     Palanca = (X, Valor),
@@ -35,6 +40,16 @@ cruzar(pasillo(X, de_cabeza), Palancas, seguro) :-
 
 cruzar(pasillo(X, de_cabeza), Palancas, trampa) :-
     not(cruzar(pasillo(X, de_cabeza), Palancas, seguro)).
+
+%% Casos con juntas
+cruzar(junta(SubMapa1,SubMapa2), Palancas, seguro) :-
+    cruzar(SubMapa1, Palancas, seguro),
+    cruzar(SubMapa2, Palancas, seguro), !.
+
+cruzar(junta(subMapa1,subMapa2), Palancas, trampa) :-
+    not(cruzar(junta(subMapa1,subMapa2), Palancas, seguro)).
+
+%% Casos con bifurcaciones
 
 % Funciones auxiliares
 % Obtiene la palanca correspondiente al caracter X
