@@ -38,7 +38,17 @@ cruzar(junta(SubMapa1,SubMapa2), Palancas, trampa) :-
         cruzar(SubMapa2, Palancas, trampa)
     ).
 
-%% Casos con bifurcaciones (TODO)
+%% Casos con bifurcaciones (DM)
+cruzar(bifurcacion(SubMapa1,SubMapa2), Palancas, seguro) :-
+    (
+        cruzar(SubMapa1, Palancas, seguro)
+    ;
+        cruzar(SubMapa2, Palancas, seguro)
+    ).
+
+cruzar(bifurcacion(SubMapa1,SubMapa2), Palancas, trampa) :-
+    cruzar(SubMapa1, Palancas, trampa),
+    cruzar(SubMapa2, Palancas, trampa).
 
 % Funciones auxiliares
 %% Obtiene el valor de la palanca correspondiente al caracter X
