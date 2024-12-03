@@ -24,7 +24,7 @@ leer(Mapa) :-
 %% Casos base (pasillos)
 cruzar(pasillo(X,Posicion), Palancas, Seguro) :- 
     obtenerValorPalanca(X, Palancas, Valor),
-    decidirSeguro(Posicion, Valor, Seguro).
+    decidirSeguro(Posicion, Valor, Seguro), !.
 
 %% Casos con juntas
 cruzar(junta(SubMapa1,SubMapa2), Palancas, seguro) :-
@@ -52,7 +52,7 @@ cruzar(bifurcacion(SubMapa1,SubMapa2), Palancas, trampa) :-
 
 % Funciones auxiliares
 %% Obtiene el valor de la palanca correspondiente al caracter X
-obtenerValorPalanca(X, [(X, Valor)|_], Valor).
+obtenerValorPalanca(X, [(X, Valor)|_], Valor) :- !.
 obtenerValorPalanca(X, [_|T], Valor) :- obtenerValorPalanca(X, T, Valor). 
 
 %% Decide si un pasillo es seguro dada la orientacion de su caracter, y el valor de la palanca
