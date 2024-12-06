@@ -1,0 +1,13 @@
+cruzar(pasillo(a, regular),[(a, arriba)],Seguro).
+cruzar(pasillo(a, de_cabeza),[(a, arriba)],Seguro).
+cruzar(junta(pasillo(a, regular),pasillo(a, de_cabeza)),Palancas,trampa).
+cruzar(junta(pasillo(a, regular),pasillo(b, de_cabeza)),Palancas,trampa).
+cruzar(junta(pasillo(a, regular),pasillo(b, de_cabeza)),Palancas,seguro).
+cruzar(junta(pasillo(a, regular),pasillo(a, de_cabeza)),Palancas,seguro).
+cruzar(junta(pasillo(a, regular),bifurcacion(pasillo(b, regular),pasillo(c, de_cabeza))),Palancas,seguro).
+
+siempre_seguro(pasillo(a, regular)).
+siempre_seguro(bifurcacion(pasillo(b, regular),pasillo(b, de_cabeza))).
+siempre_seguro(junta(pasillo(b, regular),pasillo(b, de_cabeza))).
+siempre_seguro(bifurcacion(pasillo(a, regular),pasillo(b, de_cabeza))).
+siempre_seguro(bifurcacion(bifurcacion(pasillo(a, de_cabeza),pasillo(b, de_cabeza)),junta(pasillo(a, regular),pasillo(b, regular)))).
