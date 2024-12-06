@@ -21,34 +21,43 @@ leer(Mapa) :-
 
 % Determina las configuraciones de palancas en el laberinto que generan un cruce de estado Seguro. 
 
+cruzar(Mapa, Palancas, Seguro) :- 
+    generarPalancas(Mapa, PalancasValidas),
+    cruzar(PalancasValidas, Mapa, Palancas, Seguro).
+
 %% Casos base (pasillos)
-cruzar(pasillo(X,Posicion), Palancas, Seguro) :- 
+cruzar(PalancasValidas, pasillo(X,Posicion), Palancas, Seguro) :- 
+    Palancas = PalancasValidas,
     obtenerValorPalanca(X, Palancas, Valor),
     decidirSeguro(Posicion, Valor, Seguro), !.
 
 %% Casos con juntas
-cruzar(junta(SubMapa1,SubMapa2), Palancas, seguro) :-
-    cruzar(SubMapa1, Palancas, seguro),
-    cruzar(SubMapa2, Palancas, seguro).
+cruzar(PalancasValidas, junta(SubMapa1,SubMapa2), Palancas, seguro) :-
+    (var(Palancas); Palancas = PalancasValidas),
+    cruzar(PalancasValidas, SubMapa1, Palancas, seguro),
+    cruzar(PalancasValidas, SubMapa2, Palancas, seguro), !.
 
-cruzar(junta(SubMapa1,SubMapa2), Palancas, trampa) :-
+cruzar(PalancasValidas, junta(SubMapa1,SubMapa2), Palancas, trampa) :-
+    (var(Palancas); Palancas = PalancasValidas),
     (
-        cruzar(SubMapa1, Palancas, trampa)
+        cruzar(PalancasValidas, SubMapa1, Palancas, trampa), !
     ;   
-        cruzar(SubMapa2, Palancas, trampa)
+        cruzar(PalancasValidas, SubMapa2, Palancas, trampa), !
     ).
 
 %% Casos con bifurcaciones (DM)
-cruzar(bifurcacion(SubMapa1,SubMapa2), Palancas, seguro) :-
+cruzar(PalancasValidas, bifurcacion(SubMapa1,SubMapa2), Palancas, seguro) :-
+    (var(Palancas); Palancas = PalancasValidas),
     (
-        cruzar(SubMapa1, Palancas, seguro)
+        cruzar(PalancasValidas, SubMapa1,Palancas, seguro), !
     ;
-        cruzar(SubMapa2, Palancas, seguro)
+        cruzar(PalancasValidas, SubMapa2, Palancas, seguro), !
     ).
 
-cruzar(bifurcacion(SubMapa1,SubMapa2), Palancas, trampa) :-
-    cruzar(SubMapa1, Palancas, trampa),
-    cruzar(SubMapa2, Palancas, trampa).
+cruzar(PalancasValidas, bifurcacion(SubMapa1,SubMapa2), Palancas, trampa) :-
+    (var(Palancas); Palancas = PalancasValidas),
+    cruzar(PalancasValidas, SubMapa1, Palancas, trampa),
+    cruzar(PalancasValidas, SubMapa2, Palancas, trampa), !.
 
 % Funciones auxiliares
 %% Obtiene el valor de la palanca correspondiente al caracter X
@@ -60,3 +69,25 @@ decidirSeguro(regular, arriba, seguro).
 decidirSeguro(regular, abajo, trampa).
 decidirSeguro(de_cabeza, abajo, seguro).
 decidirSeguro(de_cabeza, arriba, trampa).
+
+%% Genera las combinaciones posibles de palancas y valores a partir del Mapa
+% Genera todas las combinaciones posibles de palancas para un mapa
+generarPalancas(Mapa, Palancas) :-
+    mapaPalancas(Mapa, Letras),
+    generarCombinaciones(Letras, Palancas).
+
+% Obtiene todas las letras de los pasillos de un mapa
+mapaPalancas(pasillo(X, _), [X]).
+mapaPalancas(junta(SubMapa1, SubMapa2), Letras) :-
+    mapaPalancas(SubMapa1, Letras1),
+    mapaPalancas(SubMapa2, Letras2),
+    append(Letras1, Letras2, Letras).
+mapaPalancas(bifurcacion(SubMapa1, SubMapa2), Letras) :-
+    mapaPalancas(junta(SubMapa1, SubMapa2), Letras).
+
+% Genera todas las combinaciones posibles de palancas para un conjunto de letras
+generarCombinaciones([], []).
+generarCombinaciones([X|T], [(X, arriba)|Rest]) :-
+    generarCombinaciones(T, Rest).
+generarCombinaciones([X|T], [(X, abajo)|Rest]) :-
+    generarCombinaciones(T, Rest).
