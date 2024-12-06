@@ -25,11 +25,12 @@ cruzar(Mapa, Palancas, Seguro) :-
         % Se generan las combinaciones de palancas validas para forzar a que Palancas se unifique
         % con listas donde aparezca la posicion de palanca para cada letra
         generarPalancas(Mapa, PalancasValidas),
-    (
+    % (
         cruzar_casos(PalancasValidas, Mapa, Palancas, Seguro)
-    ;
-        ultima_combinacion(PalancasValidas), true % Para que por lo menos devuelva true cuando se acaben las opciones de Palancas
-    ).                                            % No funciona usar !, ya que puede esperarse mas de una respuesta.
+    % ;
+    %   ultima_combinacion(PalancasValidas), true % Para que por lo menos devuelva true cuando se acaben las opciones de Palancas
+    %)
+    .                                            % No funciona usar !, ya que puede esperarse mas de una respuesta.
                                                   % No funciona usar asserta o listas, a menos que se pueda evitar que Palancas
                                                   % se unifique arbitrariamente con cualquier elemento que califique.
 
