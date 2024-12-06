@@ -22,42 +22,50 @@ leer(Mapa) :-
 % Determina las configuraciones de palancas en el laberinto que generan un cruce de estado Seguro. 
 
 cruzar(Mapa, Palancas, Seguro) :- 
-    generarPalancas(Mapa, PalancasValidas),
-    cruzar(PalancasValidas, Mapa, Palancas, Seguro).
+        % Se generan las combinaciones de palancas validas para forzar a que Palancas se unifique
+        % con listas donde aparezca la posicion de palanca para cada letra
+        generarPalancas(Mapa, PalancasValidas),
+    (
+        cruzar_casos(PalancasValidas, Mapa, Palancas, Seguro)
+    ;
+        ultima_combinacion(PalancasValidas), true % Para que por lo menos devuelva true cuando se acaben las opciones de Palancas
+    ).                                            % No funciona usar !, ya que puede esperarse mas de una respuesta.
+                                                  % No funciona usar asserta o listas, a menos que se pueda evitar que Palancas
+                                                  % se unifique arbitrariamente con cualquier elemento que califique.
 
 %% Casos base (pasillos)
-cruzar(PalancasValidas, pasillo(X,Posicion), Palancas, Seguro) :- 
+cruzar_casos(PalancasValidas, pasillo(X,Posicion), Palancas, Seguro) :- 
     Palancas = PalancasValidas,
     obtenerValorPalanca(X, Palancas, Valor),
     decidirSeguro(Posicion, Valor, Seguro), !.
 
 %% Casos con juntas
-cruzar(PalancasValidas, junta(SubMapa1,SubMapa2), Palancas, seguro) :-
+cruzar_casos(PalancasValidas, junta(SubMapa1,SubMapa2), Palancas, seguro) :-
     (var(Palancas); Palancas = PalancasValidas),
-    cruzar(PalancasValidas, SubMapa1, Palancas, seguro),
-    cruzar(PalancasValidas, SubMapa2, Palancas, seguro), !.
+    cruzar_casos(PalancasValidas, SubMapa1, Palancas, seguro),
+    cruzar_casos(PalancasValidas, SubMapa2, Palancas, seguro), !.
 
-cruzar(PalancasValidas, junta(SubMapa1,SubMapa2), Palancas, trampa) :-
+cruzar_casos(PalancasValidas, junta(SubMapa1,SubMapa2), Palancas, trampa) :-
     (var(Palancas); Palancas = PalancasValidas),
     (
-        cruzar(PalancasValidas, SubMapa1, Palancas, trampa), !
+        cruzar_casos(PalancasValidas, SubMapa1, Palancas, trampa), !
     ;   
-        cruzar(PalancasValidas, SubMapa2, Palancas, trampa), !
+        cruzar_casos(PalancasValidas, SubMapa2, Palancas, trampa), !
     ).
 
 %% Casos con bifurcaciones (DM)
-cruzar(PalancasValidas, bifurcacion(SubMapa1,SubMapa2), Palancas, seguro) :-
+cruzar_casos(PalancasValidas, bifurcacion(SubMapa1,SubMapa2), Palancas, seguro) :-
     (var(Palancas); Palancas = PalancasValidas),
     (
-        cruzar(PalancasValidas, SubMapa1,Palancas, seguro), !
+        cruzar_casos(PalancasValidas, SubMapa1,Palancas, seguro), !
     ;
-        cruzar(PalancasValidas, SubMapa2, Palancas, seguro), !
+        cruzar_casos(PalancasValidas, SubMapa2, Palancas, seguro), !
     ).
 
-cruzar(PalancasValidas, bifurcacion(SubMapa1,SubMapa2), Palancas, trampa) :-
+cruzar_casos(PalancasValidas, bifurcacion(SubMapa1,SubMapa2), Palancas, trampa) :-
     (var(Palancas); Palancas = PalancasValidas),
-    cruzar(PalancasValidas, SubMapa1, Palancas, trampa),
-    cruzar(PalancasValidas, SubMapa2, Palancas, trampa), !.
+    cruzar_casos(PalancasValidas, SubMapa1, Palancas, trampa),
+    cruzar_casos(PalancasValidas, SubMapa2, Palancas, trampa), !.
 
 % Funciones auxiliares
 %% Obtiene el valor de la palanca correspondiente al caracter X
@@ -91,3 +99,7 @@ generarCombinaciones([X|T], [(X, arriba)|Rest]) :-
     generarCombinaciones(T, Rest).
 generarCombinaciones([X|T], [(X, abajo)|Rest]) :-
     generarCombinaciones(T, Rest).
+
+% Determina si una combinacion de palancas es la ultima posible
+ultima_combinacion([(_, abajo)]) :- !.
+ultima_combinacion([(_, abajo)|T]) :- ultima_combinacion(T).
