@@ -1,7 +1,1 @@
-junta(
-    pasillo(a, regular),
-    bifurcacion(
-        pasillo(b, regular),
-        pasillo(c, de_cabeza)
-    )
-).
+junta(pasillo(a, regular),bifurcacion(pasillo(b, regular),pasillo(c, de_cabeza))).
