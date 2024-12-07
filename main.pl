@@ -1,15 +1,15 @@
-% Predicado para verificar la configuracion de estados en una lista
+% Verifica la configuración de palancas
 configuracion([]).
 configuracion([(_, Estado)|Resto]) :-
     configuracion(Resto),
     (Estado = arriba ; Estado = abajo).
 
-% Predicado principal para validar el mapa y las palancas
+% Validar mapa/palancas
 validarMapa(Mapa, Palancas) :-
     collectPasillos(Mapa, LetrasSinRepetir),
     validarPalancas(LetrasSinRepetir, Palancas).
 
-% Recolecta las letras de los pasillos en el mapa sin duplicados
+% Recolecta las letras de los pasillos en el mapa para poder restringir la salida a unicamente esta colección de pasillos
 collectPasillos(pasillo(X, _), [X]).
 collectPasillos(junta(SubMapa1, SubMapa2), Letras) :-
     collectPasillos(SubMapa1, Letras1),
@@ -25,12 +25,15 @@ validarPalancas([], []).
 validarPalancas([X|Letras], [(X, _)|Palancas]) :-
     validarPalancas(Letras, Palancas).
 
-% Seguro o Trampa de los pasillos
-esSeguro(regular, arriba).
-esSeguro(de_cabeza, abajo).
+%% Decide si un pasillo es seguro dada la orientacion de su caracter, y el valor de la palanca
+decidirSeguro(regular, arriba, seguro).
+decidirSeguro(regular, abajo, trampa).
+decidirSeguro(de_cabeza, abajo, seguro).
+decidirSeguro(de_cabeza, arriba, trampa).
 
-noEsSeguro(regular, abajo).
-noEsSeguro(de_cabeza, arriba).
+% Un pasillo es seguro o inseguro
+esSeguro(Tipo, Estado) :- decidirSeguro(Tipo, Estado, seguro).
+noEsSeguro(Tipo, Estado) :- decidirSeguro(Tipo, Estado, trampa).
 
 % Predicado principal para cruzar un mapa de pasillos
 cruzar(Mapa, Palancas, seguro) :-
