@@ -1,29 +1,77 @@
-% Verifica la configuración de palancas
-configuracion([]).
-configuracion([(_, Estado)|Resto]) :-
-    configuracion(Resto),
-    (Estado = arriba ; Estado = abajo).
+% Pide al usuario una ruta de un archivo con la estructura de un laberinto, unificandolo en Mapa.
+leer(Mapa) :- 
+    write('Ingrese la ruta del archivo: '),
+    nl,
+    read(Ruta),  % Abre el archivo en la ruta y crea un Stream asociado
+    
+    % Atrapamos posibles errores en el contenido del archivo del Mapa
+    catch(
+        (
+            open(Ruta, read, Stream),
+            read(Stream, Mapa),
+            close(Stream)
+        ),
+            error(syntax_error(_), _),
+        (
+            write('Error de sintaxis, asegurese de que el contenido del archivo termine en ".".'),
+            nl, fail
+        )
+        ).
 
-% Validar mapa/palancas
-validarMapa(Mapa, Palancas) :-
-    collectPasillos(Mapa, LetrasSinRepetir),
-    validarPalancas(LetrasSinRepetir, Palancas).
 
-% Recolecta las letras de los pasillos en el mapa para poder restringir la salida a unicamente esta colección de pasillos
-collectPasillos(pasillo(X, _), [X]).
-collectPasillos(junta(SubMapa1, SubMapa2), Letras) :-
-    collectPasillos(SubMapa1, Letras1),
-    collectPasillos(SubMapa2, Letras2),
-    append(Letras1, Letras2, Letras).
-collectPasillos(bifurcacion(SubMapa1, SubMapa2), Letras) :-
-    collectPasillos(SubMapa1, Letras1),
-    collectPasillos(SubMapa2, Letras2),
-    append(Letras1, Letras2, Letras).
+% Determina las configuraciones de palancas en el laberinto que generan un cruce de estado Seguro. 
 
-% Valida que las palancas correspondan exactamente a los pasillos recolectados
-validarPalancas([], []).
-validarPalancas([X|Letras], [(X, _)|Palancas]) :-
-    validarPalancas(Letras, Palancas).
+cruzar(Mapa, Palancas, Seguro) :- 
+        % Se generan las combinaciones de palancas validas para forzar a que Palancas se unifique
+        % con listas donde aparezca la posicion de palanca para cada letra
+        generarPalancas(Mapa, PalancasValidas),
+    % (
+        cruzar_casos(PalancasValidas, Mapa, Palancas, Seguro)
+    % ;
+    %   ultima_combinacion(PalancasValidas), true % Para que por lo menos devuelva true cuando se acaben las opciones de Palancas
+    %)
+    .                                            % No funciona usar !, ya que puede esperarse mas de una respuesta.
+                                                  % No funciona usar asserta o listas, a menos que se pueda evitar que Palancas
+                                                  % se unifique arbitrariamente con cualquier elemento que califique.
+
+%% Casos base (pasillos)
+cruzar_casos(PalancasValidas, pasillo(X,Posicion), Palancas, Seguro) :- 
+    Palancas = PalancasValidas,
+    obtenerValorPalanca(X, Palancas, Valor),
+    decidirSeguro(Posicion, Valor, Seguro), !.
+
+%% Casos con juntas
+cruzar_casos(PalancasValidas, junta(SubMapa1,SubMapa2), Palancas, seguro) :-
+    (var(Palancas); Palancas = PalancasValidas),
+    cruzar_casos(PalancasValidas, SubMapa1, Palancas, seguro),
+    cruzar_casos(PalancasValidas, SubMapa2, Palancas, seguro), !.
+
+cruzar_casos(PalancasValidas, junta(SubMapa1,SubMapa2), Palancas, trampa) :-
+    (var(Palancas); Palancas = PalancasValidas),
+    (
+        cruzar_casos(PalancasValidas, SubMapa1, Palancas, trampa), !
+    ;   
+        cruzar_casos(PalancasValidas, SubMapa2, Palancas, trampa), !
+    ).
+
+%% Casos con bifurcaciones (DM)
+cruzar_casos(PalancasValidas, bifurcacion(SubMapa1,SubMapa2), Palancas, seguro) :-
+    (var(Palancas); Palancas = PalancasValidas),
+    (
+        cruzar_casos(PalancasValidas, SubMapa1,Palancas, seguro), !
+    ;
+        cruzar_casos(PalancasValidas, SubMapa2, Palancas, seguro), !
+    ).
+
+cruzar_casos(PalancasValidas, bifurcacion(SubMapa1,SubMapa2), Palancas, trampa) :-
+    (var(Palancas); Palancas = PalancasValidas),
+    cruzar_casos(PalancasValidas, SubMapa1, Palancas, trampa),
+    cruzar_casos(PalancasValidas, SubMapa2, Palancas, trampa), !.
+
+% Funciones auxiliares
+%% Obtiene el valor de la palanca correspondiente al caracter X
+obtenerValorPalanca(X, [(X, Valor)|_], Valor) :- !.
+obtenerValorPalanca(X, [_|T], Valor) :- obtenerValorPalanca(X, T, Valor). 
 
 %% Decide si un pasillo es seguro dada la orientacion de su caracter, y el valor de la palanca
 decidirSeguro(regular, arriba, seguro).
@@ -31,52 +79,31 @@ decidirSeguro(regular, abajo, trampa).
 decidirSeguro(de_cabeza, abajo, seguro).
 decidirSeguro(de_cabeza, arriba, trampa).
 
-% Un pasillo es seguro o inseguro
-esSeguro(Tipo, Estado) :- decidirSeguro(Tipo, Estado, seguro).
-noEsSeguro(Tipo, Estado) :- decidirSeguro(Tipo, Estado, trampa).
+%% Genera las combinaciones posibles de palancas y valores a partir del Mapa
+% Genera todas las combinaciones posibles de palancas para un mapa
+generarPalancas(Mapa, Palancas) :-
+    mapaPalancas(Mapa, Letras),
+    generarCombinaciones(Letras, Palancas).
 
-% Predicado principal para cruzar un mapa de pasillos
-cruzar(Mapa, Palancas, seguro) :-
-    validarMapa(Mapa, Palancas),
-    configuracion(Palancas),
-    evaluarMapa(Mapa, Palancas, seguro).
+% Obtiene todas las letras de los pasillos de un mapa
+mapaPalancas(pasillo(X, _), [X]).
+mapaPalancas(junta(SubMapa1, SubMapa2), Letras) :-
+    mapaPalancas(SubMapa1, Letras1),
+    mapaPalancas(SubMapa2, Letras2),
+    union(Letras1, Letras2, Letras).
+mapaPalancas(bifurcacion(SubMapa1, SubMapa2), Letras) :-
+    mapaPalancas(junta(SubMapa1, SubMapa2), Letras).
 
-cruzar(Mapa, Palancas, trampa) :-
-    validarMapa(Mapa, Palancas),
-    configuracion(Palancas),
-    % Si no es seguro, debe ser trampa.
-    not(cruzar(Mapa, Palancas, seguro)).
+% Genera todas las combinaciones posibles de palancas para un conjunto de letras
+generarCombinaciones([], []).
+generarCombinaciones([X|T], [(X, arriba)|Rest]) :-
+    generarCombinaciones(T, Rest).
+generarCombinaciones([X|T], [(X, abajo)|Rest]) :-
+    generarCombinaciones(T, Rest).
 
-
-% Caso base para evaluar el pasillo en el mapa
-evaluarMapa(pasillo(X, Modo), Palancas, seguro) :-
-    esSeguro(Modo, Estado),
-    member((X, Estado), Palancas).
-
-evaluarMapa(pasillo(X, Modo), Palancas, trampa) :-
-    noEsSeguro(Modo, Estado),
-    member((X, Estado), Palancas).
-
-
-% Manejo de juntas
-evaluarMapa(junta(SubMapa1, SubMapa2), Palancas, seguro) :-
-    % Recolectar todas las configuraciones de palancas para los submapas y eliminar duplicados
-    % mini parche: (sin esto genera configuraciones iguales)
-    setof(Configuracion, (evaluarMapa(SubMapa1, Palancas, seguro), 
-                          evaluarMapa(SubMapa2, Palancas, seguro),
-                          Configuracion = (SubMapa1, SubMapa2)), _).
-
-
-evaluarMapa(junta(_, _), Palancas, trampa) :-
-    not(evaluarMapa(junta(_, _), Palancas, seguro)).
-
-% Manejo de bifurcaciones
-evaluarMapa(bifurcacion(SubMapa1, SubMapa2), Palancas, seguro) :-
-    evaluarMapa(SubMapa1, Palancas, seguro);
-    evaluarMapa(SubMapa2, Palancas, seguro).
-
-evaluarMapa(bifurcacion(_, _), Palancas, trampa) :-
-    not(evaluarMapa(bifurcacion(_, _), Palancas, seguro)).
+% Determina si una combinacion de palancas es la ultima posible
+ultima_combinacion([(_, abajo)]) :- !.
+ultima_combinacion([(_, abajo)|T]) :- ultima_combinacion(T).
 
 % Ambospredicados son siempre falsos:
 siempre_seguro(pasillo(_, _)) :- false.
@@ -89,8 +116,28 @@ siempre_seguro(bifurcacion(SubMapa1, SubMapa2)) :-
     ).
 
 % Evalua las combinaciones de bifurcaciones y juntas
-evalBifurcacion(bifurcacion(_, _), bifurcacion(_, _)).
-evalBifurcacion(bifurcacion(_, _), junta(_, _)).
-evalBifurcacion(junta(_, _), bifurcacion(_, _)).
 
+evalBifurcacion(bifurcacion(pasillo(X,Modo1),pasillo(Y,Modo1)),
+                bifurcacion(pasillo(X,Modo2),pasillo(Y,Modo2))) :-
+            Modo1 \= Modo2, !.
+evalBifurcacion(bifurcacion(pasillo(X,Modo1),pasillo(Y,Modo1)),
+                bifurcacion(pasillo(Y,Modo2),pasillo(X,Modo2))) :-
+            Modo1 \= Modo2, !.
 
+evalBifurcacion(bifurcacion(pasillo(X,ModoX1),pasillo(Y,ModoY1)),
+                junta(pasillo(X,ModoX2),pasillo(Y,ModoY2))) :-
+            ModoX1 \= ModoX2, ModoY1 \= ModoY2, !.
+evalBifurcacion(bifurcacion(pasillo(X,ModoX1),pasillo(Y,ModoY1)),
+                junta(pasillo(Y,ModoY2),pasillo(X,ModoX2))) :-
+            ModoX1 \= ModoX2, ModoY1 \= ModoY2, !.
+
+evalBifurcacion(junta(pasillo(X,ModoX1),pasillo(Y,ModoY1)),
+                bifurcacion(pasillo(X,ModoX2),pasillo(Y,ModoY2))) :-
+            ModoX1 \= ModoX2, ModoY1 \= ModoY2, !.
+evalBifurcacion(junta(pasillo(X,ModoX1),pasillo(Y,ModoY1)),
+                bifurcacion(pasillo(Y,ModoY2),pasillo(X,ModoX2))) :-
+            ModoX1 \= ModoX2, ModoY1 \= ModoY2, !.
+
+evalBifurcacion(SubMapa1, SubMapa2) :-
+    siempre_seguro(SubMapa1);
+    siempre_seguro(SubMapa2).
