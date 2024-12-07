@@ -101,7 +101,9 @@ generarCombinaciones([X|T], [(X, abajo)|Rest]) :-
     generarCombinaciones(T, Rest).
 
 %% siempre_seguro %%
+siempre_seguro(Mapa) :- not(cruzar(Mapa,_,trampa)).
 
+/*
 % Un pasillo o una junta siempre pueden ser no seguros
 siempre_seguro(pasillo(_, _)) :- false.
 siempre_seguro(junta(_, _)) :- false.
@@ -144,3 +146,4 @@ evalBifurcacion(junta(pasillo(X,ModoX1),pasillo(Y,ModoY1)),
 evalBifurcacion(SubMapa1, SubMapa2) :-
     siempre_seguro(SubMapa1);
     siempre_seguro(SubMapa2).
+*/
