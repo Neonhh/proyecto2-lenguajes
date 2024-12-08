@@ -101,20 +101,4 @@ generarCombinaciones([X|T], [(X, abajo)|Rest]) :-
     generarCombinaciones(T, Rest).
 
 %% siempre_seguro %%
-
-% Un pasillo o una junta siempre pueden ser no seguros
-siempre_seguro(pasillo(_, _)) :- false.
-siempre_seguro(junta(_, _)) :- false.
-
-% Una bifurcacion es siempre segura si al menos uno de los submapas es siempre seguro
-siempre_seguro(bifurcacion(SubMapa1, SubMapa2)) :-
-    % tiene ambas configuraciones posibles de X
-    ( (SubMapa1 = pasillo(X, Modo1), SubMapa2 = pasillo(X, Modo2), Modo1 \= Modo2); 
-      evalBifurcacion(SubMapa1, SubMapa2)
-    ).
-
-%% Evalua las combinaciones de bifurcaciones y juntas
-% Combinaciones de bifurcaciones y juntas que pueden ser siempre seguras aunque sus terminos
-% no sean siempre seguros
-
 siempre_seguro(Mapa) :- not(cruzar(Mapa,_,trampa)).
