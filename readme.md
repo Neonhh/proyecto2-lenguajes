@@ -29,7 +29,7 @@ Para poder usar reglas como `cruzar /3`, tomando `Mapa` como el contenido de un 
 
 ### Ejemplos de uso
 
-#### Predicado leer
+#### Predicado ```leer```
 Para contenido de mapa_1
 ```
 junta(pasillo(a, regular),bifurcacion(pasillo(b, regular),pasillo(c, de_cabeza))).
@@ -95,3 +95,31 @@ Mapa = junta(pasillo(a, regular), bifurcacion(pasillo(b, regular), pasillo(c, de
 Palancas = [(a, abajo), (b, abajo), (c, abajo)],
 Seguro = trampa.
 ``` 
+#### Predicado ```siempre_seguro```
+Usando algunos de los ejemplos del PDF inicial del proyecto:
+Para:
+```
+siempre_seguro(
+    pasillo(a, regular)
+).
+```
+Imprime efectivamente:
+```
+false.
+```
+Para:
+
+```
+siempre_seguro(
+    bifurcacion(
+        pasillo(b, regular),
+        pasillo(b, de_cabeza)
+)
+).
+
+```
+Imprime efectivamente:
+
+```
+true.
+```
