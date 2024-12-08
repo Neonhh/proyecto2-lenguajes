@@ -22,16 +22,9 @@ leer(Mapa) :-
 % Determina las configuraciones de palancas en el laberinto que generan un cruce de estado Seguro. 
 
 cruzar(Mapa, Palancas, Seguro) :- 
-        % Se generan las combinaciones de palancas validas para forzar a que Palancas se unifique
-        % con listas donde aparezca la posicion de palanca para cada letra
-        generarPalancas(Mapa, PalancasValidas),
-        cruzar_casos(PalancasValidas, Mapa, Palancas, Seguro).
-                                                % Se intento evitar que cruzar /3 imprimiera false al terminar de unificar palancas.
-                                                % No funciona usar !, ya que puede esperarse mas de una respuesta.
-                                                % No funciona usar asserta, a menos que se pueda evitar que Palancas
-                                                % se unifique arbitrariamente con cualquier elemento que califique.
-                                                % Con findall /3 se podria obtener una lista de todas las combinaciones validas,
-                                                % pero las implementaciones hechas por nosotros no lograron resolver el problema.
+    generarPalancas(Mapa, PalancasValidas),
+    setof(P, cruzar_casos(PalancasValidas, Mapa, P, Seguro), PalancasUnicas),
+    member(Palancas, PalancasUnicas).
 
 %% Casos base (pasillos)
 cruzar_casos(PalancasValidas, pasillo(X,Posicion), Palancas, Seguro) :- 
