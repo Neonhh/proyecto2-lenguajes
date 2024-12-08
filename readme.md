@@ -23,8 +23,6 @@ Algunas veces se podra observar en las llamadas de `cruzar /3` un false al final
 
 Para este fin, se puede utilizar el predicado `leer /1`. Por ejemplo, leer(Mapa) pedirá una ruta de archivo al usuario, usando la sintaxis característica de Prolog, que puede ser por ejemplo `mapa_1.` (sin olvidar el punto al final), luego de lo cual se asignará a la variable `Mapa` según el contenido del archivo mapa_1 (en este caso en el mismo repositorio que el script).
 
-### Uso de `leer` junto con el resto de funciones
+### Uso de `leer` junto con el resto de predicados
 
 Para poder usar reglas como `cruzar /3`, tomando `Mapa` como el contenido de un archivo `mapa_1`, dentro del interprete swipl invocar `leer(Mapa), cruzar(Mapa, Palancas, Seguro)` donde `Palancas` o `Seguro` pueden estar instanciados o no.
-
-**Advertencia:** Si se quieren unificar Palancas, hacer la llamada mencionada tiene un comportamiento inesperado donde solo unifica una combinacion aunque haya mas posibles. Se puede ver el resto de combinaciones utilizando `trace`, o colocando el contenido del mapa directamente en `cruzar /3`.

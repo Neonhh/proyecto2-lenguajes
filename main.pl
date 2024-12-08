@@ -1,22 +1,21 @@
 % Pide al usuario una ruta de un archivo con la estructura de un laberinto, unificandolo en Mapa.
-leer(Mapa) :- 
+leer(Mapa) :-
     write('Ingrese la ruta del archivo: '),
-    nl,
-    read(Ruta),  % Abre el archivo en la ruta y crea un Stream asociado
-    
-    % Atrapamos posibles errores en el contenido del archivo del Mapa
+    read_line_to_string(user_input, NombreArchivo), % Lee la ruta del archivo como string
     catch(
         (
-            open(Ruta, read, Stream),
-            read(Stream, Mapa),
-            close(Stream)
+            open(NombreArchivo, read, Stream), % Abre el archivo para lectura
+            read_stream_to_codes(Stream, Codes), % Lee el contenido del archivo como códigos ASCII
+            close(Stream), % Cierra el archivo
+            string_codes(Str, Codes), % Convierte los códigos ASCII a string
+            term_string(Mapa, Str) % Convierte el string en un término Prolog y lo unifica con Mapa
         ),
-            error(syntax_error(_), _),
+        error(syntax_error(_), _), % Manejo de errores de sintaxis
         (
-            write('Error de sintaxis, asegurese de que el contenido del archivo termine en ".".'),
+            write('Error de sintaxis: asegúrese de que el contenido termine con un punto "."'), 
             nl, fail
         )
-        ).
+    ).
 
 
 % Determina las configuraciones de palancas en el laberinto que generan un cruce de estado Seguro. 
