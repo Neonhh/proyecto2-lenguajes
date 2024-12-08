@@ -29,7 +29,7 @@ Para poder usar reglas como `cruzar /3`, tomando `Mapa` como el contenido de un 
 
 ### Ejemplos de uso
 
-#### Función leer
+#### Predicado leer
 Para contenido de mapa_1
 ```
 junta(pasillo(a, regular),bifurcacion(pasillo(b, regular),pasillo(c, de_cabeza))).
@@ -44,12 +44,24 @@ Mapa = junta(pasillo(a, regular), bifurcacion(pasillo(b, regular), pasillo(c, de
 ```
 Para contenido de mapa_2:
 ```
-junta(pasillo(a, regular),bifurcacion(pasillo(b, regular),pasillo(c, de_cabeza))).
+junta(pasillo(b, regular),pasillo(c, de_cabeza)).
 ```
 En el cual imprime:
 ```
 ?- leer(Mapa).
 Ingrese la ruta del archivo: mapa_2
 Mapa = junta(pasillo(b, regular), pasillo(c, de_cabeza)).
+
+```
+
+Para contenido de mapa_3:
+```
+pasillo(b,regular).
+```
+En el cual imprime:
+```
+?- leer(Mapa).
+Ingrese la ruta del archivo: mapa_3
+Mapa = pasillo(b, regular).
 
 ```
