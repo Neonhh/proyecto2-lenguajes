@@ -26,3 +26,30 @@ Para este fin, se puede utilizar el predicado `leer /1`. Por ejemplo, leer(Mapa)
 ### Uso de `leer` junto con el resto de predicados
 
 Para poder usar reglas como `cruzar /3`, tomando `Mapa` como el contenido de un archivo `mapa_1`, dentro del interprete swipl invocar `leer(Mapa), cruzar(Mapa, Palancas, Seguro)` donde `Palancas` o `Seguro` pueden estar instanciados o no.
+
+### Ejemplos de uso
+
+#### Función leer
+Para contenido de mapa_1
+```
+junta(pasillo(a, regular),bifurcacion(pasillo(b, regular),pasillo(c, de_cabeza))).
+```
+En el cual imprime:
+
+```
+?- leer(Mapa).
+Ingrese la ruta del archivo: mapa_1
+Mapa = junta(pasillo(a, regular), bifurcacion(pasillo(b, regular), pasillo(c, de_cabeza))).
+
+```
+Para contenido de mapa_2:
+```
+junta(pasillo(a, regular),bifurcacion(pasillo(b, regular),pasillo(c, de_cabeza))).
+```
+En el cual imprime:
+```
+?- leer(Mapa).
+Ingrese la ruta del archivo: mapa_2
+Mapa = junta(pasillo(b, regular), pasillo(c, de_cabeza)).
+
+```
