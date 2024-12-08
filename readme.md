@@ -65,3 +65,33 @@ Ingrese la ruta del archivo: mapa_3
 Mapa = pasillo(b, regular).
 
 ```
+
+Para ``` leer(Mapa), cruzar(Mapa, Palancas, Seguro) ``` con ```mapa_1 ```:
+```
+?- leer(Mapa), cruzar(Mapa, Palancas, Seguro).
+Ingrese la ruta del archivo: mapa_1
+Mapa = junta(pasillo(a, regular), bifurcacion(pasillo(b, regular), pasillo(c, de_cabeza))),
+Palancas = [(a, arriba), (b, arriba), (c, arriba)],
+Seguro = seguro ;
+Mapa = junta(pasillo(a, regular), bifurcacion(pasillo(b, regular), pasillo(c, de_cabeza))),
+Palancas = [(a, arriba), (b, arriba), (c, abajo)],
+Seguro = seguro ;
+Mapa = junta(pasillo(a, regular), bifurcacion(pasillo(b, regular), pasillo(c, de_cabeza))),
+Palancas = [(a, arriba), (b, abajo), (c, arriba)],
+Seguro = trampa ;
+Mapa = junta(pasillo(a, regular), bifurcacion(pasillo(b, regular), pasillo(c, de_cabeza))),
+Palancas = [(a, arriba), (b, abajo), (c, abajo)],
+Seguro = seguro ;
+Mapa = junta(pasillo(a, regular), bifurcacion(pasillo(b, regular), pasillo(c, de_cabeza))),
+Palancas = [(a, abajo), (b, arriba), (c, arriba)],
+Seguro = trampa ;
+Mapa = junta(pasillo(a, regular), bifurcacion(pasillo(b, regular), pasillo(c, de_cabeza))),
+Palancas = [(a, abajo), (b, arriba), (c, abajo)],
+Seguro = trampa ;
+Mapa = junta(pasillo(a, regular), bifurcacion(pasillo(b, regular), pasillo(c, de_cabeza))),
+Palancas = [(a, abajo), (b, abajo), (c, arriba)],
+Seguro = trampa ;
+Mapa = junta(pasillo(a, regular), bifurcacion(pasillo(b, regular), pasillo(c, de_cabeza))),
+Palancas = [(a, abajo), (b, abajo), (c, abajo)],
+Seguro = trampa.
+``` 
