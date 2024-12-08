@@ -101,46 +101,4 @@ generarCombinaciones([X|T], [(X, abajo)|Rest]) :-
     generarCombinaciones(T, Rest).
 
 %% siempre_seguro %%
-
-% Un pasillo o una junta siempre pueden ser no seguros
-siempre_seguro(pasillo(_, _)) :- false.
-siempre_seguro(junta(_, _)) :- false.
-
-% Una bifurcacion es siempre segura si al menos uno de los submapas es siempre seguro
-siempre_seguro(bifurcacion(SubMapa1, SubMapa2)) :-
-    % tiene ambas configuraciones posibles de X
-    ( (SubMapa1 = pasillo(X, Modo1), SubMapa2 = pasillo(X, Modo2), Modo1 \= Modo2); 
-      evalBifurcacion(SubMapa1, SubMapa2)
-    ).
-
-%% Evalua las combinaciones de bifurcaciones y juntas
-% Combinaciones de bifurcaciones y juntas que pueden ser siempre seguras aunque sus terminos
-% no sean siempre seguros
-
-% 2 bifurcaciones
-evalBifurcacion(bifurcacion(pasillo(X,Modo1),pasillo(Y,Modo1)),
-                bifurcacion(pasillo(X,Modo2),pasillo(Y,Modo2))) :-
-            Modo1 \= Modo2, !.
-evalBifurcacion(bifurcacion(pasillo(X,Modo1),pasillo(Y,Modo1)),
-                bifurcacion(pasillo(Y,Modo2),pasillo(X,Modo2))) :-
-            Modo1 \= Modo2, !.
-
-% Una bifurcacion y una junta
-evalBifurcacion(bifurcacion(pasillo(X,ModoX1),pasillo(Y,ModoY1)),
-                junta(pasillo(X,ModoX2),pasillo(Y,ModoY2))) :-
-            ModoX1 \= ModoX2, ModoY1 \= ModoY2, !.
-evalBifurcacion(bifurcacion(pasillo(X,ModoX1),pasillo(Y,ModoY1)),
-                junta(pasillo(Y,ModoY2),pasillo(X,ModoX2))) :-
-            ModoX1 \= ModoX2, ModoY1 \= ModoY2, !.
-
-evalBifurcacion(junta(pasillo(X,ModoX1),pasillo(Y,ModoY1)),
-                bifurcacion(pasillo(X,ModoX2),pasillo(Y,ModoY2))) :-
-            ModoX1 \= ModoX2, ModoY1 \= ModoY2, !.
-evalBifurcacion(junta(pasillo(X,ModoX1),pasillo(Y,ModoY1)),
-                bifurcacion(pasillo(Y,ModoY2),pasillo(X,ModoX2))) :-
-            ModoX1 \= ModoX2, ModoY1 \= ModoY2, !.
-
-% Haz la llamada recursiva si depende de los submapas individuales ser siempre seguro o no.
-evalBifurcacion(SubMapa1, SubMapa2) :-
-    siempre_seguro(SubMapa1);
-    siempre_seguro(SubMapa2).
+siempre_seguro(Mapa) :- not(cruzar(Mapa,_,trampa)).
